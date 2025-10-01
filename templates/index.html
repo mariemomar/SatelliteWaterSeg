@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satellite Water Segmentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .title {
+            color: #2280d7;
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 3px dashed #2280d7;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            background: #f0f7ff;
+            border-color: #1a6bb8;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #2280d7, #1a6bb8);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(34, 128, 215, 0.3);
+        }
+
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(34, 128, 215, 0.4);
+            background: linear-gradient(135deg, #1a6bb8, #155a9c);
+        }
+
+        .file-label:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #20c997, #1ea87c);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .results-section {
+            margin-top: 50px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-title {
+            color: #333;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .result-image {
+            width: 100%;
+            max-width: 350px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .result-image:hover {
+            transform: scale(1.02);
+        }
+
+        .file-name {
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2280d7;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .title {
+                font-size: 32px;
+            }
+            
+            .upload-section {
+                padding: 30px 20px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🌍 Satellite Water Segmentation</h1>
+            <p class="subtitle">Upload a satellite image to automatically detect and segment water bodies using advanced AI technology</p>
+        </div>
+
+        <form action="/" method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-section">
+                <div class="file-input-wrapper">
+                    <input type="file" name="imagefile" id="imagefile" class="file-input" accept=".tif,.tiff,.jpg,.jpeg,.png" required>
+                    <label for="imagefile" class="file-label">
+                        📁 Choose Satellite Image
+                    </label>
+                </div>
+                
+                <div class="file-name" id="fileName">No file chosen</div>
+                
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 15px; color: #666;">Processing your image... Please wait</p>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    🚀 Predict Water Segmentation
+                </button>
+            </div>
+        </form>
+
+        {% if uploaded_image %}
+        <div class="results-section show" id="resultsSection">
+            <h2 style="color: #333; font-size: 32px; margin-bottom: 10px;">🎯 Results</h2>
+            <p style="color: #666; margin-bottom: 30px;">AI-powered water body detection completed successfully</p>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <h3 class="result-title">📡 Original Satellite Image</h3>
+                    <img src="{{ uploaded_image }}" alt="Uploaded Satellite Image" class="result-image">
+                </div>
+                
+                <div class="result-card">
+                    <h3 class="result-title">💧 Predicted Water Mask</h3>
+                    <img src="{{ mask_image }}" alt="Predicted Water Mask" class="result-image">
+                    <p class="file-name">AI-generated segmentation mask</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // File name display
+        document.getElementById('imagefile').addEventListener('change', function(e) {
+            const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+            document.getElementById('fileName').textContent = fileName;
+        });
+
+        // Loading animation
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            document.getElementById('loading').style.display = 'block';
+        });
+
+        // Auto-show results if they exist
+        window.addEventListener('load', function() {
+            {% if uploaded_image %}
+            document.getElementById('resultsSection').classList.add('show');
+            {% endif %}
+        });
+    </script>
+</body>
+</html>
